@@ -15,13 +15,13 @@ import { Dropdown } from 'primereact/dropdown';
 import { Password } from 'primereact/password';
 import { useForm, Controller } from 'react-hook-form';
 import { toast } from 'sonner';
-import { 
-  Users, 
-  Building2, 
-  BookOpen, 
-  Award, 
-  Plus, 
-  Edit, 
+import {
+  Users,
+  Building2,
+  BookOpen,
+  Award,
+  Plus,
+  Edit,
   Trash2,
   Eye,
   Settings,
@@ -37,7 +37,7 @@ export default function AdminDashboard() {
   const [users, setUsers] = useState([]);
   const [projects, setProjects] = useState([]);
   const [stats, setStats] = useState({});
-  
+
   // Dialog states
   const [departmentDialog, setDepartmentDialog] = useState(false);
   const [userDialog, setUserDialog] = useState(false);
@@ -79,7 +79,7 @@ export default function AdminDashboard() {
   const onSubmitDepartment = async (data) => {
     try {
       const method = selectedDepartment ? 'PUT' : 'POST';
-      const url = selectedDepartment 
+      const url = selectedDepartment
         ? `/api/admin/departments/${selectedDepartment.id}`
         : '/api/admin/departments';
 
@@ -107,7 +107,7 @@ export default function AdminDashboard() {
   const onSubmitUser = async (data) => {
     try {
       const method = selectedUser ? 'PUT' : 'POST';
-      const url = selectedUser 
+      const url = selectedUser
         ? `/api/admin/users/${selectedUser.id}`
         : '/api/admin/users';
 
@@ -417,7 +417,6 @@ export default function AdminDashboard() {
                 placeholder="Department Name"
               />
               {errors.name && <small className="text-red-500">{errors.name.message}</small>}
-              }
             </div>
 
             <div>
@@ -428,7 +427,6 @@ export default function AdminDashboard() {
                 placeholder="Department Code"
               />
               {errors.code && <small className="text-red-500">{errors.code.message}</small>}
-              }
             </div>
 
             <div>
@@ -473,7 +471,6 @@ export default function AdminDashboard() {
                   placeholder="First Name"
                 />
                 {errors.firstName && <small className="text-red-500">{errors.firstName.message}</small>}
-                }
               </div>
 
               <div>
@@ -484,7 +481,6 @@ export default function AdminDashboard() {
                   placeholder="Last Name"
                 />
                 {errors.lastName && <small className="text-red-500">{errors.lastName.message}</small>}
-                }
               </div>
             </div>
 
@@ -497,7 +493,6 @@ export default function AdminDashboard() {
                 type="email"
               />
               {errors.email && <small className="text-red-500">{errors.email.message}</small>}
-              }
             </div>
 
             {!selectedUser && (
@@ -511,7 +506,6 @@ export default function AdminDashboard() {
                   toggleMask
                 />
                 {errors.password && <small className="text-red-500">{errors.password.message}</small>}
-                }
               </div>
             )}
 
@@ -532,7 +526,6 @@ export default function AdminDashboard() {
                   )}
                 />
                 {errors.role && <small className="text-red-500">{errors.role.message}</small>}
-                }
               </div>
 
               <div>
@@ -551,7 +544,6 @@ export default function AdminDashboard() {
                   )}
                 />
                 {errors.departmentId && <small className="text-red-500">{errors.departmentId.message}</small>}
-                }
               </div>
             </div>
 

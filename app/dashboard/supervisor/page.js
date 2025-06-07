@@ -13,11 +13,11 @@ import { InputTextarea } from 'primereact/inputtextarea';
 import { Tag } from 'primereact/tag';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { 
-  Users, 
-  BookOpen, 
-  FileText, 
-  CheckCircle, 
+import {
+  Users,
+  BookOpen,
+  FileText,
+  CheckCircle,
   XCircle,
   Clock,
   MessageSquare,
@@ -33,7 +33,7 @@ export default function SupervisorDashboard() {
   const [projects, setProjects] = useState([]);
   const [submissions, setSubmissions] = useState([]);
   const [stats, setStats] = useState({});
-  
+
   // Dialog states
   const [reviewDialog, setReviewDialog] = useState(false);
   const [selectedItem, setSelectedItem] = useState(null);
@@ -73,7 +73,7 @@ export default function SupervisorDashboard() {
 
   const onSubmitReview = async (data) => {
     try {
-      const endpoint = reviewType === 'project' 
+      const endpoint = reviewType === 'project'
         ? `/api/supervisor/projects/${selectedItem.id}/review`
         : `/api/supervisor/submissions/${selectedItem.id}/review`;
 
@@ -353,7 +353,6 @@ export default function SupervisorDashboard() {
                     )}
                   </select>
                   {errors.status && <small className="text-red-500">{errors.status.message}</small>}
-                  }
                 </div>
 
                 <div>
@@ -365,7 +364,6 @@ export default function SupervisorDashboard() {
                     placeholder="Provide detailed feedback for the student"
                   />
                   {errors.feedback && <small className="text-red-500">{errors.feedback.message}</small>}
-                  }
                 </div>
 
                 <div className="flex justify-end gap-2">

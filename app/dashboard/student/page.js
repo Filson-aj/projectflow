@@ -15,13 +15,13 @@ import { FileUpload } from 'primereact/fileupload';
 import { Tag } from 'primereact/tag';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
-import { 
-  BookOpen, 
-  User, 
-  Upload, 
-  FileText, 
-  Clock, 
-  CheckCircle, 
+import {
+  BookOpen,
+  User,
+  Upload,
+  FileText,
+  Clock,
+  CheckCircle,
   XCircle,
   Plus,
   Download
@@ -36,7 +36,7 @@ export default function StudentDashboard() {
   const [submissions, setSubmissions] = useState([]);
   const [supervisor, setSupervisor] = useState(null);
   const [stats, setStats] = useState({});
-  
+
   // Dialog states
   const [projectDialog, setProjectDialog] = useState(false);
   const [submissionDialog, setSubmissionDialog] = useState(false);
@@ -102,7 +102,7 @@ export default function StudentDashboard() {
       formData.append('title', data.title);
       formData.append('description', data.description);
       formData.append('projectId', selectedProject.id);
-      
+
       if (data.file && data.file[0]) {
         formData.append('file', data.file[0]);
       }
@@ -361,7 +361,6 @@ export default function StudentDashboard() {
                 placeholder="Enter project title"
               />
               {errors.title && <small className="text-red-500">{errors.title.message}</small>}
-              }
             </div>
 
             <div>
@@ -373,7 +372,6 @@ export default function StudentDashboard() {
                 placeholder="Describe your project in detail"
               />
               {errors.description && <small className="text-red-500">{errors.description.message}</small>}
-              }
             </div>
 
             <div className="flex justify-end gap-2">
@@ -407,7 +405,6 @@ export default function StudentDashboard() {
                 placeholder="Enter submission title"
               />
               {errors.title && <small className="text-red-500">{errors.title.message}</small>}
-              }
             </div>
 
             <div>
@@ -429,7 +426,6 @@ export default function StudentDashboard() {
                 accept=".pdf,.doc,.docx,.ppt,.pptx"
               />
               {errors.file && <small className="text-red-500">{errors.file.message}</small>}
-              }
               <small className="text-gray-500">Supported formats: PDF, DOC, DOCX, PPT, PPTX</small>
             </div>
 
