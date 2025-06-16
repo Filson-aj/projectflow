@@ -11,7 +11,7 @@ import 'primeicons/primeicons.css';
 export default function RootLayout({ children }) {
   return (
     <html lang="en">
-      <body className="bg-gradient-to-br from-blue-50 via-white to-cyan-50 min-h-screen">
+      <body className="bg-gradient-to-br from-blue-50 via-white to-cyan-50">
         <SessionProvider>
           <PrimeReactProvider>
             {children}

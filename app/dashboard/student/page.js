@@ -11,7 +11,6 @@ import { Column } from 'primereact/column';
 import { Dialog } from 'primereact/dialog';
 import { InputText } from 'primereact/inputtext';
 import { InputTextarea } from 'primereact/inputtextarea';
-import { FileUpload } from 'primereact/fileupload';
 import { Tag } from 'primereact/tag';
 import { useForm } from 'react-hook-form';
 import { toast } from 'sonner';
@@ -24,9 +23,14 @@ import {
   CheckCircle,
   XCircle,
   Plus,
-  Download
+  Download,
+  TrendingUp,
+  Target,
+  Award
 } from 'lucide-react';
 import DashboardLayout from '@/components/DashboardLayout';
+import StatisticsCard from '@/components/StatisticsCard';
+import DashboardChart from '@/components/DashboardChart';
 
 export default function StudentDashboard() {
   const { data: session, status } = useSession();
@@ -56,16 +60,14 @@ export default function StudentDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [projectsRes, submissionsRes, supervisorRes, statsRes] = await Promise.all([
+      const [projectsRes, submissionsRes, statsRes] = await Promise.all([
         fetch('/api/student/projects'),
         fetch('/api/student/submissions'),
-        fetch('/api/student/supervisor'),
         fetch('/api/student/stats')
       ]);
 
       if (projectsRes.ok) setProjects(await projectsRes.json());
       if (submissionsRes.ok) setSubmissions(await submissionsRes.json());
-      if (supervisorRes.ok) setSupervisor(await supervisorRes.json());
       if (statsRes.ok) setStats(await statsRes.json());
     } catch (error) {
       toast.error('Failed to fetch data');
@@ -90,37 +92,6 @@ export default function StudentDashboard() {
       } else {
         const error = await response.json();
         toast.error(error.message || 'Failed to submit project');
-      }
-    } catch (error) {
-      toast.error('An error occurred');
-    }
-  };
-
-  const onSubmitSubmission = async (data) => {
-    try {
-      const formData = new FormData();
-      formData.append('title', data.title);
-      formData.append('description', data.description);
-      formData.append('projectId', selectedProject.id);
-
-      if (data.file && data.file[0]) {
-        formData.append('file', data.file[0]);
-      }
-
-      const response = await fetch('/api/student/submissions', {
-        method: 'POST',
-        body: formData,
-      });
-
-      if (response.ok) {
-        toast.success('Submission uploaded successfully');
-        setSubmissionDialog(false);
-        reset();
-        setSelectedProject(null);
-        fetchData();
-      } else {
-        const error = await response.json();
-        toast.error(error.message || 'Failed to upload submission');
       }
     } catch (error) {
       toast.error('An error occurred');
@@ -160,42 +131,60 @@ export default function StudentDashboard() {
     );
   };
 
-  const downloadBodyTemplate = (rowData) => {
-    return (
-      <Button
-        icon="pi pi-download"
-        className="p-button-rounded p-button-info p-button-sm"
-        onClick={() => window.open(`/api/files/${rowData.fileName}`, '_blank')}
-        tooltip="Download File"
-      />
-    );
-  };
-
-  const statsCards = [
+  // Statistics cards data
+  const statisticsData = [
     {
       title: 'My Projects',
       value: stats.totalProjects || 0,
-      icon: <BookOpen className="w-8 h-8" />,
-      color: 'bg-blue-500'
+      icon: <BookOpen className="w-5 h-5" />,
+      gradient: 'bg-gradient-to-b from-cyan-400 to-cyan-600',
+      subtitle: '2 active',
+      description: 'projects in progress',
+      trend: { type: 'positive', value: '+1', label: 'new this month' }
     },
     {
       title: 'Approved Projects',
       value: stats.approvedProjects || 0,
-      icon: <CheckCircle className="w-8 h-8" />,
-      color: 'bg-green-500'
+      icon: <CheckCircle className="w-5 h-5" />,
+      gradient: 'bg-gradient-to-b from-green-400 to-green-600',
+      subtitle: '100%',
+      description: 'approval rate',
+      trend: { type: 'positive', value: '+25%', label: 'improvement' }
     },
     {
       title: 'Submissions',
       value: stats.totalSubmissions || 0,
-      icon: <Upload className="w-8 h-8" />,
-      color: 'bg-purple-500'
+      icon: <Upload className="w-5 h-5" />,
+      gradient: 'bg-gradient-to-b from-violet-400 to-violet-600',
+      subtitle: '3 pending',
+      description: 'review submissions',
+      trend: { type: 'neutral', value: '2', label: 'due this week' }
     },
     {
-      title: 'Pending Reviews',
-      value: stats.pendingSubmissions || 0,
-      icon: <Clock className="w-8 h-8" />,
-      color: 'bg-orange-500'
+      title: 'Progress Score',
+      value: '85%',
+      icon: <Target className="w-5 h-5" />,
+      gradient: 'bg-gradient-to-b from-orange-400 to-orange-600',
+      subtitle: 'Excellent',
+      description: 'performance rating',
+      trend: { type: 'positive', value: '+5%', label: 'this semester' }
     }
+  ];
+
+  // Chart data
+  const progressData = [
+    { name: 'Week 1', value: 20 },
+    { name: 'Week 2', value: 35 },
+    { name: 'Week 3', value: 45 },
+    { name: 'Week 4', value: 60 },
+    { name: 'Week 5', value: 75 },
+    { name: 'Week 6', value: 85 }
+  ];
+
+  const submissionStatusData = [
+    { name: 'Approved', value: 8 },
+    { name: 'Pending', value: 3 },
+    { name: 'Needs Revision', value: 2 }
   ];
 
   if (status === 'loading') {
@@ -204,7 +193,7 @@ export default function StudentDashboard() {
 
   return (
     <DashboardLayout>
-      <div className="p-6 space-y-6">
+      <div className="p-6 space-y-8">
         {/* Header */}
         <motion.div
           initial={{ opacity: 0, y: 20 }}
@@ -213,7 +202,7 @@ export default function StudentDashboard() {
         >
           <div>
             <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-            <p className="text-gray-600">Manage your projects and submissions</p>
+            <p className="text-gray-600 mt-1">Track your academic progress and manage projects</p>
           </div>
           <Button
             label="Submit Project Topic"
@@ -223,28 +212,36 @@ export default function StudentDashboard() {
           />
         </motion.div>
 
-        {/* Stats Cards */}
+        {/* Statistics Cards */}
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statsCards.map((stat, index) => (
-            <motion.div
+          {statisticsData.map((stat, index) => (
+            <StatisticsCard
               key={index}
-              initial={{ opacity: 0, y: 20 }}
-              animate={{ opacity: 1, y: 0 }}
-              transition={{ delay: index * 0.1 }}
-            >
-              <Card className="p-6 hover:shadow-lg transition-shadow">
-                <div className="flex items-center justify-between">
-                  <div>
-                    <p className="text-sm font-medium text-gray-600">{stat.title}</p>
-                    <p className="text-3xl font-bold text-gray-900">{stat.value}</p>
-                  </div>
-                  <div className={`${stat.color} text-white p-3 rounded-lg`}>
-                    {stat.icon}
-                  </div>
-                </div>
-              </Card>
-            </motion.div>
+              {...stat}
+              index={index}
+            />
           ))}
+        </div>
+
+        {/* Charts Section */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          <DashboardChart
+            type="line"
+            data={progressData}
+            title="Academic Progress (Weekly)"
+            height={300}
+            colors={['#10B981']}
+            index={0}
+          />
+
+          <DashboardChart
+            type="pie"
+            data={submissionStatusData}
+            title="Submission Status Distribution"
+            height={300}
+            colors={['#10B981', '#F59E0B', '#EF4444']}
+            index={1}
+          />
         </div>
 
         {/* Supervisor Info */}
@@ -254,96 +251,88 @@ export default function StudentDashboard() {
             animate={{ opacity: 1, y: 0 }}
             transition={{ delay: 0.4 }}
           >
-            <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50">
+            <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-0">
               <div className="flex items-center space-x-4">
-                <div className="bg-blue-600 text-white p-3 rounded-lg">
+                <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white p-4 rounded-xl">
                   <User className="w-8 h-8" />
                 </div>
                 <div>
                   <h3 className="text-xl font-semibold text-gray-900">Your Supervisor</h3>
-                  <p className="text-gray-600">{supervisor.firstName} {supervisor.lastName}</p>
-                  <p className="text-sm text-gray-500">{supervisor.email}</p>
-                  <p className="text-sm text-gray-500">{supervisor.areaOfResearch}</p>
+                  <p className="text-gray-700 font-medium">{supervisor.firstName} {supervisor.lastName}</p>
+                  <p className="text-sm text-gray-600">{supervisor.email}</p>
+                  <p className="text-sm text-gray-600">{supervisor.areaOfResearch}</p>
                 </div>
               </div>
             </Card>
           </motion.div>
         )}
 
-        {/* Projects Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.5 }}
-        >
-          <Card className="p-6">
-            <div className="flex justify-between items-center mb-4">
-              <h2 className="text-xl font-semibold">My Projects</h2>
-              <Button
-                label="Submit New Topic"
-                icon="pi pi-plus"
-                size="small"
-                onClick={() => setProjectDialog(true)}
-              />
-            </div>
-            <DataTable
-              value={projects}
-              loading={loading}
-              paginator
-              rows={10}
-              className="p-datatable-sm"
-            >
-              <Column field="title" header="Title" sortable />
-              <Column field="description" header="Description" />
-              <Column
-                field="status"
-                header="Status"
-                body={statusBodyTemplate}
-                sortable
-              />
-              <Column field="createdAt" header="Submitted" sortable />
-              <Column
-                body={actionBodyTemplate}
-                header="Actions"
-                style={{ width: '120px' }}
-              />
-            </DataTable>
-          </Card>
-        </motion.div>
+        {/* Projects and Submissions */}
+        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+          {/* Projects Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.5 }}
+          >
+            <Card className="p-6">
+              <div className="flex justify-between items-center mb-4">
+                <h2 className="text-xl font-semibold">My Projects</h2>
+                <Button
+                  label="Submit New Topic"
+                  icon="pi pi-plus"
+                  size="small"
+                  onClick={() => setProjectDialog(true)}
+                />
+              </div>
+              <DataTable
+                value={projects}
+                loading={loading}
+                paginator
+                rows={5}
+                className="p-datatable-sm"
+              >
+                <Column field="title" header="Title" />
+                <Column
+                  field="status"
+                  header="Status"
+                  body={statusBodyTemplate}
+                />
+                <Column
+                  body={actionBodyTemplate}
+                  header="Actions"
+                  style={{ width: '100px' }}
+                />
+              </DataTable>
+            </Card>
+          </motion.div>
 
-        {/* Submissions Table */}
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.6 }}
-        >
-          <Card className="p-6">
-            <h2 className="text-xl font-semibold mb-4">My Submissions</h2>
-            <DataTable
-              value={submissions}
-              loading={loading}
-              paginator
-              rows={10}
-              className="p-datatable-sm"
-            >
-              <Column field="title" header="Title" sortable />
-              <Column field="project.title" header="Project" sortable />
-              <Column field="fileName" header="File" />
-              <Column
-                field="status"
-                header="Status"
-                body={statusBodyTemplate}
-                sortable
-              />
-              <Column field="createdAt" header="Submitted" sortable />
-              <Column
-                body={downloadBodyTemplate}
-                header="Download"
-                style={{ width: '100px' }}
-              />
-            </DataTable>
-          </Card>
-        </motion.div>
+          {/* Submissions Table */}
+          <motion.div
+            initial={{ opacity: 0, y: 20 }}
+            animate={{ opacity: 1, y: 0 }}
+            transition={{ delay: 0.6 }}
+          >
+            <Card className="p-6">
+              <h2 className="text-xl font-semibold mb-4">Recent Submissions</h2>
+              <DataTable
+                value={submissions}
+                loading={loading}
+                paginator
+                rows={5}
+                className="p-datatable-sm"
+              >
+                <Column field="title" header="Title" />
+                <Column
+                  field="status"
+                  header="Status"
+                  body={statusBodyTemplate}
+                />
+                <Column field="createdAt" header="Submitted" />
+              </DataTable>
+            </Card>
+          </motion.div>
+        </div>
 
         {/* Project Dialog */}
         <Dialog
@@ -384,61 +373,6 @@ export default function StudentDashboard() {
               <Button
                 type="submit"
                 label="Submit Topic"
-              />
-            </div>
-          </form>
-        </Dialog>
-
-        {/* Submission Dialog */}
-        <Dialog
-          header="Upload Project Submission"
-          visible={submissionDialog}
-          style={{ width: '600px' }}
-          onHide={() => setSubmissionDialog(false)}
-        >
-          <form onSubmit={handleSubmit(onSubmitSubmission)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Submission Title</label>
-              <InputText
-                {...register('title', { required: 'Title is required' })}
-                className="w-full"
-                placeholder="Enter submission title"
-              />
-              {errors.title && <small className="text-red-500">{errors.title.message}</small>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Description</label>
-              <InputTextarea
-                {...register('description')}
-                className="w-full"
-                rows={3}
-                placeholder="Brief description of this submission"
-              />
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Upload File</label>
-              <input
-                type="file"
-                {...register('file', { required: 'File is required' })}
-                className="w-full p-2 border border-gray-300 rounded"
-                accept=".pdf,.doc,.docx,.ppt,.pptx"
-              />
-              {errors.file && <small className="text-red-500">{errors.file.message}</small>}
-              <small className="text-gray-500">Supported formats: PDF, DOC, DOCX, PPT, PPTX</small>
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                label="Cancel"
-                outlined
-                onClick={() => setSubmissionDialog(false)}
-              />
-              <Button
-                type="submit"
-                label="Upload Submission"
               />
             </div>
           </form>

@@ -4,7 +4,7 @@ import { motion } from 'framer-motion';
 import { Button } from 'primereact/button';
 import { Card } from 'primereact/card';
 import { useRouter } from 'next/navigation';
-import { GraduationCap, Users, BookOpen, Award, ArrowRight, Check } from 'lucide-react';
+import { GraduationCap, Users, BookOpen, Award, Check } from 'lucide-react';
 
 export default function LandingPage() {
   const router = useRouter();
@@ -44,32 +44,31 @@ export default function LandingPage() {
   return (
     <div className="min-h-screen bg-gradient-to-br from-blue-50 via-white to-cyan-50">
       {/* Navigation */}
-      <nav className="bg-white/80 backdrop-blur-md border-b border-gray-200 sticky top-0 z-50">
+      <nav className="bg-white/40 backdrop-blur-2xl border-b border-gray-300/20 sticky top-0 z-50">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="flex justify-between items-center h-16">
-            <motion.div 
+            <motion.div
               initial={{ opacity: 0, x: -20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-2"
             >
               <GraduationCap className="w-8 h-8 text-blue-600" />
-              <span className="text-xl font-bold text-gray-900">ProjectFlow</span>
+              <span className="text-2xl font-bold text-gray-900/60 hover:text-gray-900 transition-all duration-300">ProjectFlow</span>
             </motion.div>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, x: 20 }}
               animate={{ opacity: 1, x: 0 }}
               className="flex items-center space-x-4"
             >
-              <Button 
-                label="Sign In" 
-                text 
-                className="text-gray-700 hover:text-blue-600"
+              <Button
+                label="Sign In"
+                className="text-white mx-2 hover:text-gray-900 transition-all duration-300"
                 onClick={() => router.push('/auth/signin')}
               />
-              <Button 
-                label="Get Started" 
-                className="bg-blue-600 hover:bg-blue-700 border-blue-600"
+              <Button
+                label="Get Started"
+                className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600"
                 onClick={() => router.push('/auth/signup')}
               />
             </motion.div>
@@ -81,7 +80,7 @@ export default function LandingPage() {
       <section className="relative overflow-hidden pt-20 pb-32">
         <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
           <div className="text-center">
-            <motion.h1 
+            <motion.h1
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8 }}
@@ -90,8 +89,8 @@ export default function LandingPage() {
               Streamline Your
               <span className="text-transparent bg-clip-text bg-gradient-to-r from-blue-600 to-cyan-600"> Project Management</span>
             </motion.h1>
-            
-            <motion.p 
+
+            <motion.p
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.2 }}
@@ -99,24 +98,23 @@ export default function LandingPage() {
             >
               A comprehensive student project topic verification and approval system designed to enhance academic excellence through intelligent allocation and streamlined workflows.
             </motion.p>
-            
-            <motion.div 
+
+            <motion.div
               initial={{ opacity: 0, y: 30 }}
               animate={{ opacity: 1, y: 0 }}
               transition={{ duration: 0.8, delay: 0.4 }}
               className="flex flex-col sm:flex-row justify-center gap-4"
             >
-              <Button 
-                label="Get Started" 
+              <Button
+                label="Get Started"
                 icon="pi pi-arrow-right"
                 iconPos="right"
-                className="bg-blue-600 hover:bg-blue-700 border-blue-600 px-8 py-3 text-lg"
+                className="bg-blue-600 text-white/80 hover:text-white hover:bg-blue-700 border-blue-600 text-lg transition-all duration-300"
                 onClick={() => router.push('/auth/signup')}
               />
-              <Button 
-                label="Sign In" 
-                outlined
-                className="border-blue-600 text-blue-600 hover:bg-blue-50 px-8 py-3 text-lg"
+              <Button
+                label="Sign In"
+                className="text-white  hover:text-gray-900 text-lg transition-all duration-300"
                 onClick={() => router.push('/auth/signin')}
               />
             </motion.div>
@@ -133,8 +131,8 @@ export default function LandingPage() {
 
       {/* Features Section */}
       <section className="py-20 bg-white/50">
-        <div className="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-          <motion.div 
+        <div className="max-w-7xl mx-auto px-4 py-12 sm:px-6 lg:px-8">
+          <motion.div
             initial={{ opacity: 0, y: 30 }}
             whileInView={{ opacity: 1, y: 0 }}
             viewport={{ once: true }}
@@ -184,7 +182,7 @@ export default function LandingPage() {
               <p className="text-xl text-gray-600 mb-8">
                 Our platform combines cutting-edge technology with educational best practices to deliver an unparalleled project management experience.
               </p>
-              
+
               <div className="space-y-4">
                 {benefits.map((benefit, index) => (
                   <motion.div
@@ -212,7 +210,7 @@ export default function LandingPage() {
               viewport={{ once: true }}
               className="relative"
             >
-              <Card className="p-8 bg-gradient-to-br from-blue-50 to-cyan-50 border-0 shadow-xl">
+              <Card className="p-8 bg-gradient-to-br from-blue-50 backdrop-blur-2xl to-cyan-50 border-0 shadow-xl">
                 <div className="text-center">
                   <div className="w-16 h-16 bg-blue-600 rounded-full flex items-center justify-center mx-auto mb-6">
                     <GraduationCap className="w-8 h-8 text-white" />
@@ -221,11 +219,11 @@ export default function LandingPage() {
                   <p className="text-gray-600 mb-6">
                     Join thousands of students and educators who trust ProjectFlow for their academic project management needs.
                   </p>
-                  <Button 
+                  <Button
                     label="Start Your Journey"
                     icon="pi pi-arrow-right"
                     iconPos="right"
-                    className="bg-blue-600 hover:bg-blue-700 border-blue-600 w-full"
+                    className="bg-blue-600 text-white hover:bg-blue-700 border-blue-600 w-full"
                     onClick={() => router.push('/auth/signup')}
                   />
                 </div>

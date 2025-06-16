@@ -8,7 +8,7 @@ import { Card } from 'primereact/card';
 import { Password } from 'primereact/password';
 import { Button } from 'primereact/button';
 import { Message } from 'primereact/message';
-import { useForm } from 'react-hook-form';
+import { useForm, Controller } from 'react-hook-form';
 import { GraduationCap, Lock } from 'lucide-react';
 import { toast } from 'sonner';
 
@@ -18,7 +18,7 @@ export default function ChangePassword() {
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState('');
 
-  const { register, handleSubmit, watch, formState: { errors } } = useForm();
+  const { register, handleSubmit, control, watch, formState: { errors } } = useForm({ mode: 'onBlur' });
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -64,12 +64,12 @@ export default function ChangePassword() {
             <GraduationCap className="w-8 h-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900">ProjectFlow</span>
           </div>
-          
+
           <div className="flex items-center justify-center space-x-2 mb-4">
             <Lock className="w-6 h-6 text-blue-600" />
             <h1 className="text-2xl font-bold text-gray-900">Change Password</h1>
           </div>
-          
+
           <p className="text-gray-600">
             Welcome, {session?.user?.firstName}! Please change your password to continue.
           </p>
@@ -86,16 +86,23 @@ export default function ChangePassword() {
               <label htmlFor="currentPassword" className="block text-sm font-medium text-gray-700">
                 Current Password
               </label>
-              <Password
-                id="currentPassword"
-                placeholder="Enter your current password"
-                toggleMask
-                feedback={false}
-                className={`w-full ${errors.currentPassword ? 'p-invalid' : ''}`}
-                inputClassName="w-full"
-                {...register('currentPassword', {
-                  required: 'Current password is required',
-                })}
+              <Controller
+                name="currentPassword"
+                control={control}
+                rules={{ required: 'Current password is required' }}
+                render={({ field }) => (
+                  <Password
+                    id="currentpassword"
+                    placeholder="Enter your current password"
+                    inputClassName="w-full"
+                    toggleMask
+                    feedback={false}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    className={errors.currentPassword ? 'p-invalid' : ''}
+                  />
+                )}
               />
               {errors.currentPassword && (
                 <small className="text-red-500">{errors.currentPassword.message}</small>
@@ -106,19 +113,28 @@ export default function ChangePassword() {
               <label htmlFor="newPassword" className="block text-sm font-medium text-gray-700">
                 New Password
               </label>
-              <Password
-                id="newPassword"
-                placeholder="Enter your new password"
-                toggleMask
-                className={`w-full ${errors.newPassword ? 'p-invalid' : ''}`}
-                inputClassName="w-full"
-                {...register('newPassword', {
-                  required: 'New password is required',
-                  minLength: {
+              <Controller
+                name="newPassword"
+                control={control}
+                rules={{
+                  required: 'New password is required', maxLength: {
                     value: 8,
-                    message: 'Password must be at least 8 characters'
+                    message: 'Password must be at least 8 character'
                   }
-                })}
+                }}
+                render={({ field }) => (
+                  <Password
+                    id="newPassword"
+                    placeholder="Enter your new password"
+                    inputClassName="w-full"
+                    toggleMask
+                    feedback={false}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    className={errors.newPassword ? 'p-invalid' : ''}
+                  />
+                )}
               />
               {errors.newPassword && (
                 <small className="text-red-500">{errors.newPassword.message}</small>
@@ -129,17 +145,23 @@ export default function ChangePassword() {
               <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                 Confirm New Password
               </label>
-              <Password
-                id="confirmPassword"
-                placeholder="Confirm your new password"
-                toggleMask
-                feedback={false}
-                className={`w-full ${errors.confirmPassword ? 'p-invalid' : ''}`}
-                inputClassName="w-full"
-                {...register('confirmPassword', {
-                  required: 'Please confirm your new password',
-                  validate: (value) => value === watch('newPassword') || 'Passwords do not match'
-                })}
+              <Controller
+                name="confirmPassword"
+                control={control}
+                rules={{ required: 'Please confirm your password', validate: (value) => value === watch('newPassword') || 'Passwords do not match' }}
+                render={({ field }) => (
+                  <Password
+                    id="confirmPassword"
+                    placeholder="Confirm your new password"
+                    inputClassName="w-full"
+                    toggleMask
+                    feedback={false}
+                    value={field.value}
+                    onChange={field.onChange}
+                    onBlur={field.onBlur}
+                    className={errors.confirmPassword ? 'p-invalid' : ''}
+                  />
+                )}
               />
               {errors.confirmPassword && (
                 <small className="text-red-500">{errors.confirmPassword.message}</small>

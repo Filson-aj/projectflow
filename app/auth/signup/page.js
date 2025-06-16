@@ -20,9 +20,9 @@ export default function SignUp() {
   const [departments, setDepartments] = useState([]);
   const [error, setError] = useState('');
   const router = useRouter();
-  
+
   const { register, handleSubmit, control, formState: { errors }, watch } = useForm();
-  
+
   // Mock departments - in real app, fetch from API
   const departmentOptions = [
     { label: 'Computer Science', value: 'CS' },
@@ -75,12 +75,12 @@ export default function SignUp() {
             <ArrowLeft className="w-4 h-4" />
             <span>Back to Home</span>
           </Link>
-          
+
           <div className="flex items-center justify-center space-x-2 mb-4">
             <GraduationCap className="w-8 h-8 text-blue-600" />
             <span className="text-2xl font-bold text-gray-900">ProjectFlow</span>
           </div>
-          
+
           <h1 className="text-3xl font-bold text-gray-900 mb-2">Join ProjectFlow</h1>
           <p className="text-gray-600">Create your student account to get started</p>
         </div>
@@ -101,7 +101,7 @@ export default function SignUp() {
                 <InputText
                   id="firstName"
                   placeholder="Enter your first name"
-                  className={`w-full ${errors.firstName ? 'p-invalid' : ''}`}
+                  className={`w-full border-gray-200 ${errors.firstName ? 'p-invalid' : ''}`}
                   {...register('firstName', {
                     required: 'First name is required',
                     minLength: {
@@ -171,7 +171,7 @@ export default function SignUp() {
                   className={`w-full ${errors.phone ? 'p-invalid' : ''}`}
                   {...register('phone', {
                     pattern: {
-                      value: /^[\+]?[1-9][\d]{0,15}$/,
+                      value: /^[\+]?[0-9][\d]{0,15}$/,
                       message: 'Invalid phone number'
                     }
                   })}
@@ -233,19 +233,28 @@ export default function SignUp() {
                 <label htmlFor="password" className="block text-sm font-medium text-gray-700">
                   Password *
                 </label>
-                <Password
-                  id="password"
-                  placeholder="Create a password"
-                  toggleMask
-                  className={`w-full ${errors.password ? 'p-invalid' : ''}`}
-                  inputClassName="w-full"
-                  {...register('password', {
-                    required: 'Password is required',
-                    minLength: {
+                <Controller
+                  name="password"
+                  control={control}
+                  rules={{
+                    required: 'Password is required', minLength: {
                       value: 8,
                       message: 'Password must be at least 8 characters'
                     }
-                  })}
+                  }}
+                  render={({ field }) => (
+                    <Password
+                      id="password"
+                      placeholder="Enter your password"
+                      inputClassName="w-full"
+                      toggleMask
+                      feedback={false}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className={errors.password ? 'p-invalid' : ''}
+                    />
+                  )}
                 />
                 {errors.password && (
                   <small className="text-red-500">{errors.password.message}</small>
@@ -256,17 +265,23 @@ export default function SignUp() {
                 <label htmlFor="confirmPassword" className="block text-sm font-medium text-gray-700">
                   Confirm Password *
                 </label>
-                <Password
-                  id="confirmPassword"
-                  placeholder="Confirm your password"
-                  toggleMask
-                  feedback={false}
-                  className={`w-full ${errors.confirmPassword ? 'p-invalid' : ''}`}
-                  inputClassName="w-full"
-                  {...register('confirmPassword', {
-                    required: 'Please confirm your password',
-                    validate: (value) => value === watch('password') || 'Passwords do not match'
-                  })}
+                <Controller
+                  name="confirmPassword"
+                  control={control}
+                  rules={{ required: 'Please confirm your passwrod', validate: (value) => value === watch('password') || 'Passwords do not match' }}
+                  render={({ field }) => (
+                    <Password
+                      id="confirmPassword"
+                      placeholder="Confirm your password"
+                      inputClassName="w-full"
+                      toggleMask
+                      feedback={false}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className={errors.confirmPassword ? 'p-invalid' : ''}
+                    />
+                  )}
                 />
                 {errors.confirmPassword && (
                   <small className="text-red-500">{errors.confirmPassword.message}</small>

@@ -33,7 +33,7 @@ model User {
   role           UserRole
   isFirstLogin   Boolean  @default(true)
   areaOfResearch String?
-  maxStudents    Int? // For supervisors
+  maxStudents    Int?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
 
