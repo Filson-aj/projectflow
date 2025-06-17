@@ -547,6 +547,7 @@ export default function CoordinatorDashboard() {
                 placeholder="First Name"
               />
               {errors.firstName && <small className="text-red-500">{errors.firstName.message}</small>}
+              }
             </div>
 
             <div>
@@ -557,6 +558,7 @@ export default function CoordinatorDashboard() {
                 placeholder="Last Name"
               />
               {errors.lastName && <small className="text-red-500">{errors.lastName.message}</small>}
+              }
             </div>
           </div>
 
@@ -569,6 +571,7 @@ export default function CoordinatorDashboard() {
               type="email"
             />
             {errors.email && <small className="text-red-500">{errors.email.message}</small>}
+            }
           </div>
 
           {!selectedSupervisor && (
@@ -582,6 +585,7 @@ export default function CoordinatorDashboard() {
                 toggleMask
               />
               {errors.password && <small className="text-red-500">{errors.password.message}</small>}
+              }
             </div>
           )}
 
@@ -594,6 +598,7 @@ export default function CoordinatorDashboard() {
               placeholder="Area of Research"
             />
             {errors.areaOfResearch && <small className="text-red-500">{errors.areaOfResearch.message}</small>}
+            }
           </div>
 
           <div>
@@ -605,6 +610,7 @@ export default function CoordinatorDashboard() {
               type="number"
             />
             {errors.maxStudents && <small className="text-red-500">{errors.maxStudents.message}</small>}
+            }
           </div>
 
           <div className="flex justify-end gap-2">
