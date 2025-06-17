@@ -357,6 +357,7 @@ export default function StudentDashboard() {
               placeholder="Enter project title"
             />
             {errors.title && <small className="text-red-500">{errors.title.message}</small>}
+            }
           </div>
 
           <div>
@@ -368,6 +369,7 @@ export default function StudentDashboard() {
               placeholder="Describe your project in detail"
             />
             {errors.description && <small className="text-red-500">{errors.description.message}</small>}
+            }
           </div>
 
           <div className="flex justify-end gap-2">
