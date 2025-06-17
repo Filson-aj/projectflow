@@ -28,7 +28,6 @@ import {
   Target,
   Award
 } from 'lucide-react';
-import DashboardLayout from '@/components/DashboardLayout';
 import StatisticsCard from '@/components/StatisticsCard';
 import DashboardChart from '@/components/DashboardChart';
 
@@ -66,7 +65,16 @@ export default function StudentDashboard() {
         fetch('/api/student/stats')
       ]);
 
-      if (projectsRes.ok) setProjects(await projectsRes.json());
+      if (projectsRes.ok) {
+        const projectsData = await projectsRes.json();
+        setProjects(projectsData);
+        
+        // Get supervisor info from the first assigned project
+        const assignedProject = projectsData.find(p => p.supervisor);
+        if (assignedProject) {
+          setSupervisor(assignedProject.supervisor);
+        }
+      }
       if (submissionsRes.ok) setSubmissions(await submissionsRes.json());
       if (statsRes.ok) setStats(await statsRes.json());
     } catch (error) {
@@ -183,7 +191,7 @@ export default function StudentDashboard() {
 
   const submissionStatusData = [
     { name: 'Approved', value: 8 },
-    { name: 'Pending', value: 3 },
+    { name: 'Pending', value: stats.pendingSubmissions || 0 },
     { name: 'Needs Revision', value: 2 }
   ];
 
@@ -192,192 +200,190 @@ export default function StudentDashboard() {
   }
 
   return (
-    <DashboardLayout>
-      <div className="p-6 space-y-8">
-        {/* Header */}
+    <div className="p-6 space-y-8">
+      {/* Header */}
+      <motion.div
+        initial={{ opacity: 0, y: 20 }}
+        animate={{ opacity: 1, y: 0 }}
+        className="flex justify-between items-center"
+      >
+        <div>
+          <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
+          <p className="text-gray-600 mt-1">Track your academic progress and manage projects</p>
+        </div>
+        <Button
+          label="Submit Project Topic"
+          icon="pi pi-plus"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => setProjectDialog(true)}
+        />
+      </motion.div>
+
+      {/* Statistics Cards */}
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+        {statisticsData.map((stat, index) => (
+          <StatisticsCard
+            key={index}
+            {...stat}
+            index={index}
+          />
+        ))}
+      </div>
+
+      {/* Charts Section */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        <DashboardChart
+          type="line"
+          data={progressData}
+          title="Academic Progress (Weekly)"
+          height={300}
+          colors={['#10B981']}
+          index={0}
+        />
+
+        <DashboardChart
+          type="pie"
+          data={submissionStatusData}
+          title="Submission Status Distribution"
+          height={300}
+          colors={['#10B981', '#F59E0B', '#EF4444']}
+          index={1}
+        />
+      </div>
+
+      {/* Supervisor Info */}
+      {supervisor && (
         <motion.div
           initial={{ opacity: 0, y: 20 }}
           animate={{ opacity: 1, y: 0 }}
-          className="flex justify-between items-center"
+          transition={{ delay: 0.4 }}
         >
-          <div>
-            <h1 className="text-3xl font-bold text-gray-900">Student Dashboard</h1>
-            <p className="text-gray-600 mt-1">Track your academic progress and manage projects</p>
-          </div>
-          <Button
-            label="Submit Project Topic"
-            icon="pi pi-plus"
-            className="bg-blue-600 hover:bg-blue-700"
-            onClick={() => setProjectDialog(true)}
-          />
+          <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-0">
+            <div className="flex items-center space-x-4">
+              <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white p-4 rounded-xl">
+                <User className="w-8 h-8" />
+              </div>
+              <div>
+                <h3 className="text-xl font-semibold text-gray-900">Your Supervisor</h3>
+                <p className="text-gray-700 font-medium">{supervisor.firstName} {supervisor.lastName}</p>
+                <p className="text-sm text-gray-600">{supervisor.email}</p>
+                <p className="text-sm text-gray-600">{supervisor.areaOfResearch}</p>
+              </div>
+            </div>
+          </Card>
+        </motion.div>
+      )}
+
+      {/* Projects and Submissions */}
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
+        {/* Projects Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.5 }}
+        >
+          <Card className="p-6">
+            <div className="flex justify-between items-center mb-4">
+              <h2 className="text-xl font-semibold">My Projects</h2>
+              <Button
+                label="Submit New Topic"
+                icon="pi pi-plus"
+                size="small"
+                onClick={() => setProjectDialog(true)}
+              />
+            </div>
+            <DataTable
+              value={projects}
+              loading={loading}
+              paginator
+              rows={5}
+              className="p-datatable-sm"
+            >
+              <Column field="title" header="Title" />
+              <Column
+                field="status"
+                header="Status"
+                body={statusBodyTemplate}
+              />
+              <Column
+                body={actionBodyTemplate}
+                header="Actions"
+                style={{ width: '100px' }}
+              />
+            </DataTable>
+          </Card>
         </motion.div>
 
-        {/* Statistics Cards */}
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
-          {statisticsData.map((stat, index) => (
-            <StatisticsCard
-              key={index}
-              {...stat}
-              index={index}
-            />
-          ))}
-        </div>
-
-        {/* Charts Section */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          <DashboardChart
-            type="line"
-            data={progressData}
-            title="Academic Progress (Weekly)"
-            height={300}
-            colors={['#10B981']}
-            index={0}
-          />
-
-          <DashboardChart
-            type="pie"
-            data={submissionStatusData}
-            title="Submission Status Distribution"
-            height={300}
-            colors={['#10B981', '#F59E0B', '#EF4444']}
-            index={1}
-          />
-        </div>
-
-        {/* Supervisor Info */}
-        {supervisor && (
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.4 }}
-          >
-            <Card className="p-6 bg-gradient-to-r from-blue-50 to-cyan-50 border-0">
-              <div className="flex items-center space-x-4">
-                <div className="bg-gradient-to-br from-blue-500 to-cyan-600 text-white p-4 rounded-xl">
-                  <User className="w-8 h-8" />
-                </div>
-                <div>
-                  <h3 className="text-xl font-semibold text-gray-900">Your Supervisor</h3>
-                  <p className="text-gray-700 font-medium">{supervisor.firstName} {supervisor.lastName}</p>
-                  <p className="text-sm text-gray-600">{supervisor.email}</p>
-                  <p className="text-sm text-gray-600">{supervisor.areaOfResearch}</p>
-                </div>
-              </div>
-            </Card>
-          </motion.div>
-        )}
-
-        {/* Projects and Submissions */}
-        <div className="grid grid-cols-1 lg:grid-cols-2 gap-6">
-          {/* Projects Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.5 }}
-          >
-            <Card className="p-6">
-              <div className="flex justify-between items-center mb-4">
-                <h2 className="text-xl font-semibold">My Projects</h2>
-                <Button
-                  label="Submit New Topic"
-                  icon="pi pi-plus"
-                  size="small"
-                  onClick={() => setProjectDialog(true)}
-                />
-              </div>
-              <DataTable
-                value={projects}
-                loading={loading}
-                paginator
-                rows={5}
-                className="p-datatable-sm"
-              >
-                <Column field="title" header="Title" />
-                <Column
-                  field="status"
-                  header="Status"
-                  body={statusBodyTemplate}
-                />
-                <Column
-                  body={actionBodyTemplate}
-                  header="Actions"
-                  style={{ width: '100px' }}
-                />
-              </DataTable>
-            </Card>
-          </motion.div>
-
-          {/* Submissions Table */}
-          <motion.div
-            initial={{ opacity: 0, y: 20 }}
-            animate={{ opacity: 1, y: 0 }}
-            transition={{ delay: 0.6 }}
-          >
-            <Card className="p-6">
-              <h2 className="text-xl font-semibold mb-4">Recent Submissions</h2>
-              <DataTable
-                value={submissions}
-                loading={loading}
-                paginator
-                rows={5}
-                className="p-datatable-sm"
-              >
-                <Column field="title" header="Title" />
-                <Column
-                  field="status"
-                  header="Status"
-                  body={statusBodyTemplate}
-                />
-                <Column field="createdAt" header="Submitted" />
-              </DataTable>
-            </Card>
-          </motion.div>
-        </div>
-
-        {/* Project Dialog */}
-        <Dialog
-          header="Submit Project Topic"
-          visible={projectDialog}
-          style={{ width: '600px' }}
-          onHide={() => setProjectDialog(false)}
+        {/* Submissions Table */}
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.6 }}
         >
-          <form onSubmit={handleSubmit(onSubmitProject)} className="space-y-4">
-            <div>
-              <label className="block text-sm font-medium mb-2">Project Title</label>
-              <InputText
-                {...register('title', { required: 'Title is required' })}
-                className="w-full"
-                placeholder="Enter project title"
+          <Card className="p-6">
+            <h2 className="text-xl font-semibold mb-4">Recent Submissions</h2>
+            <DataTable
+              value={submissions}
+              loading={loading}
+              paginator
+              rows={5}
+              className="p-datatable-sm"
+            >
+              <Column field="title" header="Title" />
+              <Column
+                field="status"
+                header="Status"
+                body={statusBodyTemplate}
               />
-              {errors.title && <small className="text-red-500">{errors.title.message}</small>}
-            </div>
-
-            <div>
-              <label className="block text-sm font-medium mb-2">Project Description</label>
-              <InputTextarea
-                {...register('description', { required: 'Description is required' })}
-                className="w-full"
-                rows={5}
-                placeholder="Describe your project in detail"
-              />
-              {errors.description && <small className="text-red-500">{errors.description.message}</small>}
-            </div>
-
-            <div className="flex justify-end gap-2">
-              <Button
-                type="button"
-                label="Cancel"
-                outlined
-                onClick={() => setProjectDialog(false)}
-              />
-              <Button
-                type="submit"
-                label="Submit Topic"
-              />
-            </div>
-          </form>
-        </Dialog>
+              <Column field="createdAt" header="Submitted" />
+            </DataTable>
+          </Card>
+        </motion.div>
       </div>
-    </DashboardLayout>
+
+      {/* Project Dialog */}
+      <Dialog
+        header="Submit Project Topic"
+        visible={projectDialog}
+        style={{ width: '600px' }}
+        onHide={() => setProjectDialog(false)}
+      >
+        <form onSubmit={handleSubmit(onSubmitProject)} className="space-y-4">
+          <div>
+            <label className="block text-sm font-medium mb-2">Project Title</label>
+            <InputText
+              {...register('title', { required: 'Title is required' })}
+              className="w-full"
+              placeholder="Enter project title"
+            />
+            {errors.title && <small className="text-red-500">{errors.title.message}</small>}
+          </div>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Project Description</label>
+            <InputTextarea
+              {...register('description', { required: 'Description is required' })}
+              className="w-full"
+              rows={5}
+              placeholder="Describe your project in detail"
+            />
+            {errors.description && <small className="text-red-500">{errors.description.message}</small>}
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              label="Cancel"
+              outlined
+              onClick={() => setProjectDialog(false)}
+            />
+            <Button
+              type="submit"
+              label="Submit Topic"
+            />
+          </div>
+        </form>
+      </Dialog>
+    </div>
   );
 }

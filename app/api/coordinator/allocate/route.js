@@ -10,8 +10,8 @@ function allocateStudentsToSupervisors(students, supervisors) {
   // Create a copy of supervisors with current student count
   const supervisorCapacity = supervisors.map(supervisor => ({
     ...supervisor,
-    currentStudents: supervisor._count?.studentProjects || 0,
-    availableSlots: supervisor.maxStudents - (supervisor._count?.studentProjects || 0)
+    currentStudents: supervisor._count?.supervisorAllocations || 0,
+    availableSlots: supervisor.maxStudents - (supervisor._count?.supervisorAllocations || 0)
   })).filter(s => s.availableSlots > 0);
 
   // Sort students by research area similarity and registration date
@@ -28,7 +28,7 @@ function allocateStudentsToSupervisors(students, supervisors) {
       .map(supervisor => {
         const similarity = calculateSimilarity(
           student.areaOfResearch.toLowerCase(),
-          supervisor.areaOfResearch.toLowerCase()
+          supervisor.areaOfResearch?.toLowerCase() || ''
         );
         
         return {
@@ -69,6 +69,8 @@ function allocateStudentsToSupervisors(students, supervisors) {
 }
 
 function calculateSimilarity(text1, text2) {
+  if (!text1 || !text2) return 0;
+  
   const words1 = text1.split(/\s+/);
   const words2 = text2.split(/\s+/);
   
@@ -79,12 +81,19 @@ function calculateSimilarity(text1, text2) {
   return commonWords.length / Math.max(words1.length, words2.length);
 }
 
-export async function POST() {
+export async function POST(request) {
   try {
     const session = await getServerSession(authOptions);
     
     if (!session || session.user.role !== 'COORDINATOR') {
       return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
+    }
+
+    const body = await request.json();
+    const { sessionId } = body;
+
+    if (!sessionId) {
+      return NextResponse.json({ error: 'Session ID is required' }, { status: 400 });
     }
 
     // Get coordinator's department
@@ -97,14 +106,15 @@ export async function POST() {
       return NextResponse.json({ error: 'Department not found' }, { status: 400 });
     }
 
-    // Get unallocated students in the department
+    // Get unallocated students in the department for the specific session
     const unallocatedStudents = await prisma.user.findMany({
       where: {
         role: 'STUDENT',
         studentDepartmentId: coordinator.coordinatedDepartment.id,
-        studentProjects: {
+        sessionId: sessionId,
+        studentAllocations: {
           none: {
-            supervisorId: { not: null }
+            sessionId: sessionId
           }
         }
       }
@@ -119,7 +129,11 @@ export async function POST() {
       include: {
         _count: {
           select: {
-            supervisedProjects: true
+            supervisorAllocations: {
+              where: {
+                sessionId: sessionId
+              }
+            }
           }
         }
       }
@@ -128,35 +142,31 @@ export async function POST() {
     // Run allocation algorithm
     const allocations = allocateStudentsToSupervisors(unallocatedStudents, supervisors);
 
-    // Apply allocations to approved projects
+    // Apply allocations to database
     let allocatedCount = 0;
     
     for (const allocation of allocations) {
-      // Find an approved project for this student
-      const approvedProject = await prisma.project.findFirst({
-        where: {
-          studentId: allocation.studentId,
-          status: 'APPROVED',
-          supervisorId: null
-        }
-      });
-
-      if (approvedProject) {
-        await prisma.project.update({
-          where: { id: approvedProject.id },
+      try {
+        await prisma.allocation.create({
           data: {
+            sessionId: sessionId,
             supervisorId: allocation.supervisorId,
-            status: 'ASSIGNED'
+            studentId: allocation.studentId,
+            departmentId: coordinator.coordinatedDepartment.id
           }
         });
         allocatedCount++;
+      } catch (error) {
+        console.error('Error creating allocation:', error);
+        // Continue with other allocations even if one fails
       }
     }
 
     return NextResponse.json({
       message: 'Allocation completed successfully',
       allocatedCount,
-      totalStudents: unallocatedStudents.length
+      totalStudents: unallocatedStudents.length,
+      sessionId
     });
   } catch (error) {
     console.error('Error running allocation:', error);

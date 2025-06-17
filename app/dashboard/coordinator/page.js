@@ -41,10 +41,10 @@ export default function CoordinatorDashboard() {
   const [supervisors, setSupervisors] = useState([]);
   const [students, setStudents] = useState([]);
   const [projects, setProjects] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [stats, setStats] = useState({});
   const [editRecord, setEditRecord] = useState(false)
   const [deleteRecord, setDeleteRecord] = useState(false)
-
 
   const [selectedRows, setSelectedRows] = useState([])
   const [selectedItem, setSelectedItem] = useState(null)
@@ -58,6 +58,7 @@ export default function CoordinatorDashboard() {
   const [supervisorDialog, setSupervisorDialog] = useState(false);
   const [allocationDialog, setAllocationDialog] = useState(false);
   const [selectedSupervisor, setSelectedSupervisor] = useState(null);
+  const [selectedSession, setSelectedSession] = useState(null);
 
   const { register, handleSubmit, control, reset, formState: { errors } } = useForm();
 
@@ -73,17 +74,19 @@ export default function CoordinatorDashboard() {
   const fetchData = async () => {
     try {
       setLoading(true);
-      const [supervisorsRes, studentsRes, projectsRes, statsRes] = await Promise.all([
+      const [supervisorsRes, studentsRes, projectsRes, statsRes, sessionsRes] = await Promise.all([
         fetch('/api/coordinator/supervisors'),
         fetch('/api/coordinator/students'),
         fetch('/api/coordinator/projects'),
-        fetch('/api/coordinator/stats')
+        fetch('/api/coordinator/stats'),
+        fetch('/api/sessions')
       ]);
 
       if (supervisorsRes.ok) setSupervisors(await supervisorsRes.json());
       if (studentsRes.ok) setStudents(await studentsRes.json());
       if (projectsRes.ok) setProjects(await projectsRes.json());
       if (statsRes.ok) setStats(await statsRes.json());
+      if (sessionsRes.ok) setSessions(await sessionsRes.json());
     } catch (error) {
       toast.error('Failed to fetch data');
     } finally {
@@ -135,15 +138,23 @@ export default function CoordinatorDashboard() {
   };
 
   const runAllocation = async () => {
+    if (!selectedSession) {
+      toast.error('Please select a session for allocation');
+      return;
+    }
+
     try {
       setLoading(true);
       const response = await fetch('/api/coordinator/allocate', {
         method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ sessionId: selectedSession })
       });
 
       if (response.ok) {
         const result = await response.json();
         toast.success(`Allocation completed! ${result.allocatedCount} students allocated`);
+        setAllocationDialog(false);
         fetchData();
       } else {
         const error = await response.json();
@@ -240,9 +251,9 @@ export default function CoordinatorDashboard() {
   ];
 
   const projectDistribution = [
-    { name: 'Approved', value: 85 },
-    { name: 'Pending', value: 10 },
-    { name: 'Rejected', value: 5 },
+    { name: 'Approved', value: stats.approvedProjects || 0 },
+    { name: 'Pending', value: stats.pendingProjects || 0 },
+    { name: 'Rejected', value: (stats.totalProjects || 0) - (stats.approvedProjects || 0) - (stats.pendingProjects || 0) },
   ];
 
   const statusBodyTemplate = (rowData) => {
@@ -332,7 +343,6 @@ export default function CoordinatorDashboard() {
     }
   ];
 
-
   if (status === 'loading') {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
   }
@@ -358,6 +368,22 @@ export default function CoordinatorDashboard() {
         ))}
       </div>
 
+      {/* Action Buttons */}
+      <div className="flex gap-4">
+        <Button
+          label="Add Supervisor"
+          icon="pi pi-plus"
+          className="bg-blue-600 hover:bg-blue-700"
+          onClick={() => openSupervisorDialog()}
+        />
+        <Button
+          label="Run Allocation"
+          icon="pi pi-refresh"
+          className="bg-green-600 hover:bg-green-700"
+          onClick={() => setAllocationDialog(true)}
+        />
+      </div>
+
       {/* Charts Section */}
       <div className="flex flex-col sm:flex-row space-y-4 space-x-0 sm:space-x-4 sm:space-y-0">
         <div className='w-2/3'>
@@ -377,7 +403,7 @@ export default function CoordinatorDashboard() {
             data={projectDistribution}
             title="Project Distribution"
             height={300}
-            colors={['#3B82F6', '#F59E0B', '#FF0000']}
+            colors={['#10B981', '#F59E0B', '#EF4444']}
             index={1}
           />
         </div>
@@ -392,7 +418,7 @@ export default function CoordinatorDashboard() {
       >
         <Card className="w-full">
           <div className="flex justify-between items-center mb-4">
-            <h2 className="text-xl font-semibold">Recent Supervisors</h2>
+            <h2 className="text-xl font-semibold">Department Supervisors</h2>
             <div className='flex justify-between items-center space-x-3'>
               <Button
                 label="View All"
@@ -403,7 +429,7 @@ export default function CoordinatorDashboard() {
                 icon='pi pi-plus'
                 className=""
                 rounded
-              /* onClick={() => setNewRecord(true)} */
+                onClick={() => openSupervisorDialog()}
               />
             </div>
           </div>
@@ -412,8 +438,8 @@ export default function CoordinatorDashboard() {
             <span className='p-input-icon-left block'>
               <i className='pi pi-search ml-2' />
               <InputText
-                placeholder='Search users...'
-                onInput={(e) => setSelectedSupervisor({
+                placeholder='Search supervisors...'
+                onInput={(e) => setSupervisorFilters({
                   global: { value: e.target.value, matchMode: FilterMatchMode.CONTAINS }
                 })}
                 className='w-full rounded focus:outline-none focus:ring-1 focus:ring-cyan-500 px-8 py-2'
@@ -440,38 +466,7 @@ export default function CoordinatorDashboard() {
             <Column field="areaOfResearch" header="Research Area" />
             <Column field="maxStudents" header="Max Students" />
             <Column
-              body={(rowData) => (
-                <div className='relative'>
-                  <button
-                    className='p-2 bg-transparent border-0 focus:outline-none'
-                    onClick={(e) => {
-                      setContextMenuRow({ ...rowData })
-                      menu.current.toggle(e)
-                    }}
-                  >
-                    <MoreVertical className='text-gray-600' />
-                  </button>
-                  <OverlayPanel ref={menu} className='bg-white/40 backdrop-blur-2xl'>
-                    <div className='flex flex-col space-y-3'>
-                      {contextMenuItems.map((item, index) => (
-                        <button
-                          key={index}
-                          className={`bg-transparent border-0 p-2 flex items-center justify-between hover:${item.label === 'Delete'
-                            ? 'bg-red-100 text-red-500'
-                            : 'bg-gray-100'
-                            }`}
-                          onClick={(e) => {
-                            item.command(e)
-                            menu.current.hide()
-                          }}
-                        >
-                          {item.icon} {item.label}
-                        </button>
-                      ))}
-                    </div>
-                  </OverlayPanel>
-                </div>
-              )}
+              body={supervisorActionBodyTemplate}
               header='Actions'
             />
           </DataTable>
@@ -487,18 +482,17 @@ export default function CoordinatorDashboard() {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Department Students</h2>
           <DataTable
-            value={students}
+            value={students.slice(0, 5)}
             loading={loading}
             paginator
-            rows={10}
+            rows={5}
             className="p-datatable-sm"
           >
-            <Column field="firstName" header="First Name" sortable />
-            <Column field="lastName" header="Last Name" sortable />
+            <Column field="name" header="Name" sortable />
             <Column field="email" header="Email" sortable />
             <Column field="areaOfResearch" header="Research Area" />
-            <Column field="supervisor.firstName" header="Supervisor" />
-            <Column field="createdAt" header="Joined" sortable />
+            <Column field="supervisor" header="Supervisor" />
+            <Column field="session.name" header="Session" />
           </DataTable>
         </Card>
       </motion.div>
@@ -512,14 +506,14 @@ export default function CoordinatorDashboard() {
         <Card className="p-6">
           <h2 className="text-xl font-semibold mb-4">Project Topics</h2>
           <DataTable
-            value={projects}
+            value={projects.slice(0, 5)}
             loading={loading}
             paginator
-            rows={10}
+            rows={5}
             className="p-datatable-sm"
           >
             <Column field="title" header="Title" sortable />
-            <Column field="student.firstName" header="Student" sortable />
+            <Column field="studentName" header="Student" sortable />
             <Column field="description" header="Description" />
             <Column
               field="status"
@@ -527,7 +521,6 @@ export default function CoordinatorDashboard() {
               body={statusBodyTemplate}
               sortable
             />
-            <Column field="createdAt" header="Submitted" sortable />
             <Column
               body={projectActionBodyTemplate}
               header="Actions"
@@ -627,6 +620,44 @@ export default function CoordinatorDashboard() {
             />
           </div>
         </form>
+      </Dialog>
+
+      {/* Allocation Dialog */}
+      <Dialog
+        header="Run Student-Supervisor Allocation"
+        visible={allocationDialog}
+        style={{ width: '500px' }}
+        onHide={() => setAllocationDialog(false)}
+      >
+        <div className="space-y-4">
+          <p>Select the academic session for which you want to run the allocation:</p>
+          
+          <div>
+            <label className="block text-sm font-medium mb-2">Academic Session</label>
+            <Dropdown
+              value={selectedSession}
+              onChange={(e) => setSelectedSession(e.value)}
+              options={sessions.map(session => ({ label: session.name, value: session.id }))}
+              placeholder="Select Session"
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              label="Cancel"
+              outlined
+              onClick={() => setAllocationDialog(false)}
+            />
+            <Button
+              label="Run Allocation"
+              onClick={runAllocation}
+              loading={loading}
+              disabled={!selectedSession}
+            />
+          </div>
+        </div>
       </Dialog>
     </section>
   );

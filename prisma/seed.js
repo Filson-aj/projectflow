@@ -41,6 +41,29 @@ async function main() {
     },
   });
 
+  // Create sample sessions
+  const session2024 = await prisma.session.upsert({
+    where: { name: '2024/2025 Academic Session' },
+    update: {},
+    create: {
+      name: '2024/2025 Academic Session',
+      startDate: new Date('2024-09-01'),
+      endDate: new Date('2025-08-31'),
+      isActive: true,
+    },
+  });
+
+  const session2023 = await prisma.session.upsert({
+    where: { name: '2023/2024 Academic Session' },
+    update: {},
+    create: {
+      name: '2023/2024 Academic Session',
+      startDate: new Date('2023-09-01'),
+      endDate: new Date('2024-08-31'),
+      isActive: false,
+    },
+  });
+
   // Create sample coordinator
   const coordinator = await prisma.user.upsert({
     where: { email: 'coordinator.cs@system.com' },
@@ -70,6 +93,23 @@ async function main() {
       areaOfResearch: 'Machine Learning, Artificial Intelligence',
       maxStudents: 5,
       isFirstLogin: true,
+    },
+  });
+
+  // Create sample student
+  const student = await prisma.user.upsert({
+    where: { email: 'student.cs@system.com' },
+    update: {},
+    create: {
+      email: 'student.cs@system.com',
+      password: hashedPassword,
+      firstName: 'Alice',
+      lastName: 'Student',
+      role: 'STUDENT',
+      studentDepartmentId: computerScienceDept.id,
+      sessionId: session2024.id,
+      areaOfResearch: 'Machine Learning, Data Science',
+      isFirstLogin: false,
     },
   });
 

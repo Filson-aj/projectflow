@@ -5,10 +5,10 @@ import { prisma } from '@/lib/prisma';
 export async function POST(request) {
   try {
     const body = await request.json();
-    const { firstName, lastName, email, phone, department, areaOfResearch, password } = body;
+    const { firstName, lastName, email, phone, department, sessionId, areaOfResearch, password } = body;
 
     // Validate required fields
-    if (!firstName || !lastName || !email || !department || !areaOfResearch || !password) {
+    if (!firstName || !lastName || !email || !department || !sessionId || !areaOfResearch || !password) {
       return NextResponse.json(
         { error: 'All required fields must be provided' },
         { status: 400 }
@@ -39,6 +39,18 @@ export async function POST(request) {
       );
     }
 
+    // Verify session exists
+    const sessionRecord = await prisma.session.findUnique({
+      where: { id: sessionId }
+    });
+
+    if (!sessionRecord) {
+      return NextResponse.json(
+        { error: 'Session not found' },
+        { status: 400 }
+      );
+    }
+
     // Hash password
     const hashedPassword = await bcrypt.hash(password, 12);
 
@@ -53,6 +65,7 @@ export async function POST(request) {
         role: 'STUDENT',
         areaOfResearch,
         studentDepartmentId: departmentRecord.id,
+        sessionId: sessionId,
         isFirstLogin: false, // Students don't need to change password on first login
       },
     });

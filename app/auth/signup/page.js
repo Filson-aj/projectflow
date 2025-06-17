@@ -1,6 +1,6 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card } from 'primereact/card';
@@ -18,18 +18,43 @@ import { toast } from 'sonner';
 export default function SignUp() {
   const [loading, setLoading] = useState(false);
   const [departments, setDepartments] = useState([]);
+  const [sessions, setSessions] = useState([]);
   const [error, setError] = useState('');
   const router = useRouter();
 
   const { register, handleSubmit, control, formState: { errors }, watch } = useForm();
 
-  // Mock departments - in real app, fetch from API
-  const departmentOptions = [
-    { label: 'Computer Science', value: 'CS' },
-    { label: 'Engineering', value: 'ENG' },
-    { label: 'Mathematics', value: 'MATH' },
-    { label: 'Physics', value: 'PHY' },
-  ];
+  useEffect(() => {
+    // Fetch departments and sessions
+    const fetchData = async () => {
+      try {
+        const [deptRes, sessionsRes] = await Promise.all([
+          fetch('/api/admin/departments'),
+          fetch('/api/sessions')
+        ]);
+
+        if (deptRes.ok) {
+          const deptData = await deptRes.json();
+          setDepartments(deptData.map(dept => ({
+            label: `${dept.name} (${dept.code})`,
+            value: dept.code
+          })));
+        }
+
+        if (sessionsRes.ok) {
+          const sessionsData = await sessionsRes.json();
+          setSessions(sessionsData.map(session => ({
+            label: session.name,
+            value: session.id
+          })));
+        }
+      } catch (error) {
+        console.error('Error fetching data:', error);
+      }
+    };
+
+    fetchData();
+  }, []);
 
   const onSubmit = async (data) => {
     setLoading(true);
@@ -89,7 +114,7 @@ export default function SignUp() {
         <Card className="p-8 shadow-xl border-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
             {error && (
-              <Message severity="error\" text={error} className="w-full" />
+              <Message severity="error" text={error} className="w-full" />
             )}
 
             {/* Personal Information */}
@@ -183,26 +208,50 @@ export default function SignUp() {
             </div>
 
             {/* Academic Information */}
-            <div className="space-y-2">
-              <label htmlFor="department" className="block text-sm font-medium text-gray-700">
-                Department *
-              </label>
-              <Controller
-                name="department"
-                control={control}
-                rules={{ required: 'Please select a department' }}
-                render={({ field }) => (
-                  <Dropdown
-                    {...field}
-                    options={departmentOptions}
-                    placeholder="Select your department"
-                    className={`w-full ${errors.department ? 'p-invalid' : ''}`}
-                  />
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700">
+                  Department *
+                </label>
+                <Controller
+                  name="department"
+                  control={control}
+                  rules={{ required: 'Please select a department' }}
+                  render={({ field }) => (
+                    <Dropdown
+                      {...field}
+                      options={departments}
+                      placeholder="Select your department"
+                      className={`w-full ${errors.department ? 'p-invalid' : ''}`}
+                    />
+                  )}
+                />
+                {errors.department && (
+                  <small className="text-red-500">{errors.department.message}</small>
                 )}
-              />
-              {errors.department && (
-                <small className="text-red-500">{errors.department.message}</small>
-              )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="sessionId" className="block text-sm font-medium text-gray-700">
+                  Academic Session *
+                </label>
+                <Controller
+                  name="sessionId"
+                  control={control}
+                  rules={{ required: 'Please select an academic session' }}
+                  render={({ field }) => (
+                    <Dropdown
+                      {...field}
+                      options={sessions}
+                      placeholder="Select academic session"
+                      className={`w-full ${errors.sessionId ? 'p-invalid' : ''}`}
+                    />
+                  )}
+                />
+                {errors.sessionId && (
+                  <small className="text-red-500">{errors.sessionId.message}</small>
+                )}
+              </div>
             </div>
 
             <div className="space-y-2">
@@ -237,7 +286,8 @@ export default function SignUp() {
                   name="password"
                   control={control}
                   rules={{
-                    required: 'Password is required', minLength: {
+                    required: 'Password is required', 
+                    minLength: {
                       value: 8,
                       message: 'Password must be at least 8 characters'
                     }
@@ -268,7 +318,10 @@ export default function SignUp() {
                 <Controller
                   name="confirmPassword"
                   control={control}
-                  rules={{ required: 'Please confirm your passwrod', validate: (value) => value === watch('password') || 'Passwords do not match' }}
+                  rules={{ 
+                    required: 'Please confirm your password', 
+                    validate: (value) => value === watch('password') || 'Passwords do not match' 
+                  }}
                   render={({ field }) => (
                     <Password
                       id="confirmPassword"
