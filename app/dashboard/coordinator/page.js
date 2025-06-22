@@ -266,6 +266,44 @@ export default function CoordinatorDashboard() {
           </div>
         </div>
       </Dialog>
+
+      {/* Allocation Dialog */}
+      <Dialog
+        header="Run Student-Supervisor Allocation"
+        visible={allocationDialog}
+        style={{ width: '500px' }}
+        onHide={() => setAllocationDialog(false)}
+      >
+        <div className="space-y-4">
+          <p>Select the academic session for which you want to run the allocation:</p>
+
+          <div>
+            <label className="block text-sm font-medium mb-2">Academic Session</label>
+            <Dropdown
+              value={selectedSession}
+              onChange={(e) => setSelectedSession(e.value)}
+              options={sessions.map(session => ({ label: session.name, value: session.id }))}
+              placeholder="Select Session"
+              className="w-full"
+            />
+          </div>
+
+          <div className="flex justify-end gap-2">
+            <Button
+              type="button"
+              label="Cancel"
+              outlined
+              onClick={() => setAllocationDialog(false)}
+            />
+            <Button
+              label="Run Allocation"
+              onClick={runAllocation}
+              loading={loading}
+              disabled={!selectedSession}
+            />
+          </div>
+        </div>
+      </Dialog>
     </section>
   );
 }

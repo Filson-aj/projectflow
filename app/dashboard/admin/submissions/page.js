@@ -22,27 +22,28 @@ import {
   XCircle,
   AlertCircle,
   User,
-  Users
+  Users,
+  Building2
 } from 'lucide-react';
 import moment from 'moment';
 
-export default function CoordinatorSubmissions() {
+export default function AdminSubmissions() {
   const { data: session, status } = useSession();
   const router = useRouter();
   const toast = useRef(null);
-
+  
   const [loading, setLoading] = useState(false);
   const [submissions, setSubmissions] = useState([]);
   const [selectedSubmission, setSelectedSubmission] = useState(null);
   const [viewDialog, setViewDialog] = useState(false);
-
+  
   const [filters, setFilters] = useState({
     global: { value: null, matchMode: FilterMatchMode.CONTAINS },
   });
 
   useEffect(() => {
     if (status === 'loading') return;
-    if (!session || session.user.role !== 'COORDINATOR') {
+    if (!session || session.user.role !== 'ADMIN') {
       router.push('/auth/signin');
       return;
     }
@@ -53,7 +54,7 @@ export default function CoordinatorSubmissions() {
     try {
       setLoading(true);
       const response = await fetch('/api/submissions');
-
+      
       if (response.ok) {
         setSubmissions(await response.json());
       }
@@ -129,10 +130,24 @@ export default function CoordinatorSubmissions() {
     return moment(rowData.createdAt).format('DD MMM YYYY, HH:mm');
   };
 
+  // Calculate statistics
+  const totalSubmissions = submissions.length;
   const pendingCount = submissions.filter(s => s.status === 'PENDING').length;
   const approvedCount = submissions.filter(s => s.status === 'APPROVED').length;
   const needsRevisionCount = submissions.filter(s => s.status === 'NEEDS_REVISION').length;
   const rejectedCount = submissions.filter(s => s.status === 'REJECTED').length;
+
+  // Department-wise statistics
+  const departmentStats = submissions.reduce((acc, submission) => {
+    const dept = submission.departmentName;
+    if (!acc[dept]) {
+      acc[dept] = { total: 0, pending: 0, approved: 0 };
+    }
+    acc[dept].total++;
+    if (submission.status === 'PENDING') acc[dept].pending++;
+    if (submission.status === 'APPROVED') acc[dept].approved++;
+    return acc;
+  }, {});
 
   if (status === 'loading') {
     return <div className="flex justify-center items-center min-h-screen">Loading...</div>;
@@ -149,18 +164,18 @@ export default function CoordinatorSubmissions() {
         className="flex justify-between items-center"
       >
         <div>
-          <h1 className="text-3xl font-bold text-gray-900">Department Submissions</h1>
-          <p className="text-gray-600 mt-1">Monitor all submissions in your department</p>
+          <h1 className="text-3xl font-bold text-gray-900">System Submissions</h1>
+          <p className="text-gray-600 mt-1">Monitor all submissions across the system</p>
         </div>
       </motion.div>
 
       {/* Statistics Cards */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-6">
+      <div className="grid grid-cols-1 md:grid-cols-5 gap-6">
         <Card className="p-4 bg-gradient-to-r from-blue-50 to-blue-100">
           <div className="flex items-center justify-between">
             <div>
               <p className="text-sm font-medium text-blue-600">Total Submissions</p>
-              <p className="text-2xl font-bold text-blue-900">{submissions.length}</p>
+              <p className="text-2xl font-bold text-blue-900">{totalSubmissions}</p>
             </div>
             <FileText className="w-8 h-8 text-blue-500" />
           </div>
@@ -169,7 +184,7 @@ export default function CoordinatorSubmissions() {
         <Card className="p-4 bg-gradient-to-r from-orange-50 to-orange-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-orange-600">Pending Review</p>
+              <p className="text-sm font-medium text-orange-600">Pending</p>
               <p className="text-2xl font-bold text-orange-900">{pendingCount}</p>
             </div>
             <Clock className="w-8 h-8 text-orange-500" />
@@ -186,16 +201,63 @@ export default function CoordinatorSubmissions() {
           </div>
         </Card>
 
+        <Card className="p-4 bg-gradient-to-r from-yellow-50 to-yellow-100">
+          <div className="flex items-center justify-between">
+            <div>
+              <p className="text-sm font-medium text-yellow-600">Needs Revision</p>
+              <p className="text-2xl font-bold text-yellow-900">{needsRevisionCount}</p>
+            </div>
+            <AlertCircle className="w-8 h-8 text-yellow-500" />
+          </div>
+        </Card>
+
         <Card className="p-4 bg-gradient-to-r from-red-50 to-red-100">
           <div className="flex items-center justify-between">
             <div>
-              <p className="text-sm font-medium text-red-600">Needs Action</p>
-              <p className="text-2xl font-bold text-red-900">{needsRevisionCount + rejectedCount}</p>
+              <p className="text-sm font-medium text-red-600">Rejected</p>
+              <p className="text-2xl font-bold text-red-900">{rejectedCount}</p>
             </div>
-            <AlertCircle className="w-8 h-8 text-red-500" />
+            <XCircle className="w-8 h-8 text-red-500" />
           </div>
         </Card>
       </div>
+
+      {/* Department Statistics */}
+      {Object.keys(departmentStats).length > 0 && (
+        <motion.div
+          initial={{ opacity: 0, y: 20 }}
+          animate={{ opacity: 1, y: 0 }}
+          transition={{ delay: 0.1 }}
+        >
+          <Card className="p-6">
+            <h3 className="text-lg font-semibold mb-4">Department Overview</h3>
+            <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+              {Object.entries(departmentStats).map(([dept, stats]) => (
+                <div key={dept} className="bg-gray-50 p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <Building2 className="w-4 h-4 text-gray-600" />
+                    <h4 className="font-medium text-gray-900">{dept}</h4>
+                  </div>
+                  <div className="grid grid-cols-3 gap-2 text-sm">
+                    <div className="text-center">
+                      <p className="font-semibold text-blue-600">{stats.total}</p>
+                      <p className="text-gray-600">Total</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-orange-600">{stats.pending}</p>
+                      <p className="text-gray-600">Pending</p>
+                    </div>
+                    <div className="text-center">
+                      <p className="font-semibold text-green-600">{stats.approved}</p>
+                      <p className="text-gray-600">Approved</p>
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          </Card>
+        </motion.div>
+      )}
 
       {/* Submissions Table */}
       <motion.div
@@ -206,22 +268,18 @@ export default function CoordinatorSubmissions() {
         <Card className="p-6">
           <div className="flex justify-between items-center mb-4">
             <h2 className="text-xl font-semibold">All Submissions</h2>
-          </div>
-
-          {/* Search input */}
-          <div className="px-2 mb-4">
-            <span className="p-input-icon-left block">
-              <i className="pi pi-search ml-2" />
-              <InputText
-                placeholder="Search submissions..."
-                onInput={(e) =>
-                  setFilters({
-                    global: { value: e.target.value, matchMode: FilterMatchMode.CONTAINS },
-                  })
-                }
-                className="w-full rounded focus:outline-none focus:ring-1 focus:ring-cyan-500 px-8 py-2"
-              />
-            </span>
+            <div className="flex items-center gap-4">
+              <span className="p-input-icon-left">
+                <i className="pi pi-search" />
+                <InputText
+                  placeholder="Search submissions..."
+                  onInput={(e) => setFilters({
+                    global: { value: e.target.value, matchMode: FilterMatchMode.CONTAINS }
+                  })}
+                  className="pl-8"
+                />
+              </span>
+            </div>
           </div>
 
           <DataTable
@@ -229,28 +287,29 @@ export default function CoordinatorSubmissions() {
             loading={loading}
             paginator
             rows={10}
-            rowsPerPageOptions={[5, 10, 25]}
+            rowsPerPageOptions={[5, 10, 25, 50]}
             filters={filters}
-            stripedRows
             filterDisplay="menu"
             emptyMessage="No submissions found"
             className="p-datatable-sm"
           >
             <Column field="title" header="Title" sortable />
-            <Column field="student" header="Student" sortable />
-            <Column field="supervisor" header="Supervisor" sortable />
-            <Column field="project" header="Project" sortable />
-            <Column
-              field="status"
-              header="Status"
+            <Column field="studentName" header="Student" sortable />
+            <Column field="supervisorName" header="Supervisor" sortable />
+            <Column field="departmentName" header="Department" sortable />
+            <Column field="sessionName" header="Session" sortable />
+            <Column field="fileName" header="File" sortable />
+            <Column 
+              field="status" 
+              header="Status" 
               body={statusBodyTemplate}
-              sortable
+              sortable 
             />
-            <Column
-              field="createdAt"
-              header="Submitted"
+            <Column 
+              field="createdAt" 
+              header="Submitted" 
               body={dateBodyTemplate}
-              sortable
+              sortable 
             />
             <Column
               body={actionBodyTemplate}
@@ -293,8 +352,22 @@ export default function CoordinatorSubmissions() {
                 </div>
               </div>
               <div>
+                <label className="block text-sm font-medium text-gray-700">Department</label>
+                <div className="mt-1 flex items-center gap-2">
+                  <Building2 className="w-4 h-4 text-gray-500" />
+                  <span className="text-sm text-gray-900">{selectedSubmission.departmentName}</span>
+                </div>
+              </div>
+            </div>
+
+            <div className="grid grid-cols-2 gap-4">
+              <div>
                 <label className="block text-sm font-medium text-gray-700">Project</label>
                 <p className="mt-1 text-sm text-gray-900">{selectedSubmission.projectTitle}</p>
+              </div>
+              <div>
+                <label className="block text-sm font-medium text-gray-700">Session</label>
+                <p className="mt-1 text-sm text-gray-900">{selectedSubmission.sessionName}</p>
               </div>
             </div>
 
@@ -303,9 +376,9 @@ export default function CoordinatorSubmissions() {
                 <label className="block text-sm font-medium text-gray-700">Status</label>
                 <div className="mt-1 flex items-center gap-2">
                   {getStatusIcon(selectedSubmission.status)}
-                  <Tag
-                    value={selectedSubmission.status}
-                    severity={getStatusSeverity(selectedSubmission.status)}
+                  <Tag 
+                    value={selectedSubmission.status} 
+                    severity={getStatusSeverity(selectedSubmission.status)} 
                   />
                 </div>
               </div>

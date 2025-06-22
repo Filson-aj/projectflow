@@ -72,7 +72,6 @@ export default function StudentDashboard() {
       if (projectsRes.ok) {
         const projectsData = await projectsRes.json();
         setProjects(projectsData);
-
         // Get supervisor info from the first assigned project
         const assignedProject = projectsData.find(p => p.supervisor);
         if (assignedProject) {

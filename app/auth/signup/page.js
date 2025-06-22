@@ -1,6 +1,10 @@
 'use client';
 
+<<<<<<< HEAD
 import { useState, useEffect, useRef } from 'react';
+=======
+import { useState, useEffect } from 'react';
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
 import { useRouter } from 'next/navigation';
 import { motion } from 'framer-motion';
 import { Card } from 'primereact/card';
@@ -26,11 +30,19 @@ export default function SignUp() {
   const { register, handleSubmit, control, formState: { errors }, watch } = useForm();
 
   useEffect(() => {
+<<<<<<< HEAD
+=======
+    // Fetch departments and sessions
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
     const fetchData = async () => {
       try {
         const [deptRes, sessionsRes] = await Promise.all([
           fetch('/api/admin/departments'),
+<<<<<<< HEAD
           fetch('/api/admin/sessions')
+=======
+          fetch('/api/sessions')
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
         ]);
 
         if (deptRes.ok) {
@@ -48,8 +60,13 @@ export default function SignUp() {
             value: session.id
           })));
         }
+<<<<<<< HEAD
       } catch {
         console.error('Error fetching data');
+=======
+      } catch (error) {
+        console.error('Error fetching data:', error);
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
       }
     };
 
@@ -114,7 +131,13 @@ export default function SignUp() {
         {/* Form */}
         <Card className="p-8 shadow-xl border-0">
           <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+<<<<<<< HEAD
             {error && <Message severity="error" text={error} className="w-full" />}
+=======
+            {error && (
+              <Message severity="error" text={error} className="w-full" />
+            )}
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
 
             {/* Personal */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
@@ -167,6 +190,7 @@ export default function SignUp() {
               </div>
             </div>
 
+<<<<<<< HEAD
             {/* Academic */}
             <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
               {/* Dept */}
@@ -191,6 +215,52 @@ export default function SignUp() {
                   render={({ field }) => <Dropdown {...field} options={sessions} className={`w-full ${errors.sessionId ? 'p-invalid' : ''}`} />}
                 />
                 {errors.sessionId && <small className="text-red-500">{errors.sessionId.message}</small>}
+=======
+            {/* Academic Information */}
+            <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
+              <div className="space-y-2">
+                <label htmlFor="department" className="block text-sm font-medium text-gray-700">
+                  Department *
+                </label>
+                <Controller
+                  name="department"
+                  control={control}
+                  rules={{ required: 'Please select a department' }}
+                  render={({ field }) => (
+                    <Dropdown
+                      {...field}
+                      options={departments}
+                      placeholder="Select your department"
+                      className={`w-full ${errors.department ? 'p-invalid' : ''}`}
+                    />
+                  )}
+                />
+                {errors.department && (
+                  <small className="text-red-500">{errors.department.message}</small>
+                )}
+              </div>
+
+              <div className="space-y-2">
+                <label htmlFor="sessionId" className="block text-sm font-medium text-gray-700">
+                  Academic Session *
+                </label>
+                <Controller
+                  name="sessionId"
+                  control={control}
+                  rules={{ required: 'Please select an academic session' }}
+                  render={({ field }) => (
+                    <Dropdown
+                      {...field}
+                      options={sessions}
+                      placeholder="Select academic session"
+                      className={`w-full ${errors.sessionId ? 'p-invalid' : ''}`}
+                    />
+                  )}
+                />
+                {errors.sessionId && (
+                  <small className="text-red-500">{errors.sessionId.message}</small>
+                )}
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
               </div>
             </div>
 
@@ -213,8 +283,31 @@ export default function SignUp() {
                 <Controller
                   name="password"
                   control={control}
+<<<<<<< HEAD
                   rules={{ required: 'Required', minLength: { value: 8, message: 'At least 8 chars' } }}
                   render={({ field }) => <Password id="password" toggleMask feedback={false} inputClassName="w-full" {...field} className={errors.password ? 'p-invalid' : ''} />}
+=======
+                  rules={{
+                    required: 'Password is required', 
+                    minLength: {
+                      value: 8,
+                      message: 'Password must be at least 8 characters'
+                    }
+                  }}
+                  render={({ field }) => (
+                    <Password
+                      id="password"
+                      placeholder="Enter your password"
+                      inputClassName="w-full"
+                      toggleMask
+                      feedback={false}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className={errors.password ? 'p-invalid' : ''}
+                    />
+                  )}
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
                 />
                 {errors.password && <small className="text-red-500">{errors.password.message}</small>}
               </div>
@@ -224,11 +317,31 @@ export default function SignUp() {
                 <Controller
                   name="confirmPassword"
                   control={control}
+<<<<<<< HEAD
                   rules={{
                     required: 'Confirm your password',
                     validate: value => value === watch('password') || 'Passwords do not match'
                   }}
                   render={({ field }) => <Password id="confirmPassword" toggleMask feedback={false} inputClassName="w-full" {...field} className={errors.confirmPassword ? 'p-invalid' : ''} />}
+=======
+                  rules={{ 
+                    required: 'Please confirm your password', 
+                    validate: (value) => value === watch('password') || 'Passwords do not match' 
+                  }}
+                  render={({ field }) => (
+                    <Password
+                      id="confirmPassword"
+                      placeholder="Confirm your password"
+                      inputClassName="w-full"
+                      toggleMask
+                      feedback={false}
+                      value={field.value}
+                      onChange={field.onChange}
+                      onBlur={field.onBlur}
+                      className={errors.confirmPassword ? 'p-invalid' : ''}
+                    />
+                  )}
+>>>>>>> d324c04e156fd9852cb3b213ea713d860fe54f8e
                 />
                 {errors.confirmPassword && <small className="text-red-500">{errors.confirmPassword.message}</small>}
               </div>

@@ -66,7 +66,7 @@ export async function POST(request) {
         areaOfResearch,
         studentDepartmentId: departmentRecord.id,
         sessionId: sessionId,
-        isFirstLogin: false,
+        isFirstLogin: false, // Students don't need to change password on first login
       },
     });
 
