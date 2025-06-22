@@ -15,12 +15,29 @@ model Department {
   createdAt   DateTime @default(now())
   updatedAt   DateTime @updatedAt
 
-  coordinator User?     @relation("DepartmentCoordinator")
-  supervisors User[]    @relation("DepartmentSupervisors")
-  students    User[]    @relation("DepartmentStudents")
+  coordinator User?        @relation("DepartmentCoordinator")
+  supervisors User[]       @relation("DepartmentSupervisors")
+  students    User[]       @relation("DepartmentStudents")
   projects    Project[]
+  allocations Allocation[]
 
   @@map("departments")
+}
+
+model Session {
+  id        String   @id @default(cuid())
+  name      String   @unique
+  startDate DateTime
+  endDate   DateTime
+  isActive  Boolean  @default(false)
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  users       User[]
+  projects    Project[]
+  allocations Allocation[]
+
+  @@map("sessions")
 }
 
 model User {
@@ -36,6 +53,10 @@ model User {
   maxStudents    Int?
   createdAt      DateTime @default(now())
   updatedAt      DateTime @updatedAt
+
+  // Session relationship
+  session   Session? @relation(fields: [sessionId], references: [id])
+  sessionId String?
 
   // Department relationships
   coordinatedDepartment   Department? @relation("DepartmentCoordinator", fields: [coordinatedDepartmentId], references: [id])
@@ -54,6 +75,10 @@ model User {
   // Submissions
   submissions Submission[]
 
+  // Allocations
+  supervisorAllocations Allocation[] @relation("AllocationSupervisor")
+  studentAllocations    Allocation[] @relation("AllocationStudent")
+
   @@map("users")
 }
 
@@ -67,6 +92,9 @@ model Project {
 
   department   Department @relation(fields: [departmentId], references: [id])
   departmentId String
+
+  session   Session? @relation(fields: [sessionId], references: [id])
+  sessionId String?
 
   supervisor   User?   @relation("ProjectSupervisor", fields: [supervisorId], references: [id])
   supervisorId String?
@@ -98,6 +126,27 @@ model Submission {
   studentId String
 
   @@map("submissions")
+}
+
+model Allocation {
+  id        String   @id @default(cuid())
+  createdAt DateTime @default(now())
+  updatedAt DateTime @updatedAt
+
+  session   Session @relation(fields: [sessionId], references: [id])
+  sessionId String
+
+  supervisor   User   @relation("AllocationSupervisor", fields: [supervisorId], references: [id])
+  supervisorId String
+
+  student   User   @relation("AllocationStudent", fields: [studentId], references: [id])
+  studentId String
+
+  department   Department @relation(fields: [departmentId], references: [id])
+  departmentId String
+
+  @@unique([sessionId, supervisorId, studentId])
+  @@map("allocations")
 }
 
 enum UserRole {

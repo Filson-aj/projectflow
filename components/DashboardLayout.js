@@ -26,6 +26,9 @@ import {
   HelpCircle,
   ChevronLeft,
   ChevronRight,
+  Watch,
+  Clock,
+  CalendarDays,
   User,
   Shield,
   FileText
@@ -71,7 +74,7 @@ export default function DashboardLayout({ children }) {
           { label: 'Users', icon: <Users className="w-5 h-5" />, href: `${baseUrl}/users`, command: () => router.push('/dashboard/admin/users') },
           { label: 'Departments', icon: <Building2 className="w-5 h-5" />, href: `${baseUrl}/departments`, command: () => router.push('/dashboard/admin/departments') },
           { label: 'Projects', icon: <BookOpen className="w-5 h-5" />, href: `${baseUrl}/projects`, command: () => router.push('/dashboard/admin/projects') },
-          { label: 'Settings', icon: <Settings className="w-5 h-5" />, href: `${baseUrl}/settings`, command: () => router.push('/dashboard/admin/settings') }
+          { label: 'Sessions', icon: <CalendarDays className="w-5 h-5" />, href: `${baseUrl}/sessions`, command: () => router.push('/dashboard/admin/sessions') }
         ];
       case 'COORDINATOR':
         return [
