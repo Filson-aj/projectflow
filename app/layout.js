@@ -3,6 +3,7 @@
 import './globals.css';
 import { SessionProvider } from 'next-auth/react';
 import { PrimeReactProvider } from 'primereact/api';
+import { ConfirmDialog } from 'primereact/confirmdialog';
 import { Toaster } from 'sonner';
 import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primereact/resources/primereact.min.css';
@@ -16,6 +17,7 @@ export default function RootLayout({ children }) {
           <PrimeReactProvider>
             {children}
             <Toaster position="top-right" richColors />
+            <ConfirmDialog />
           </PrimeReactProvider>
         </SessionProvider>
       </body>

@@ -164,7 +164,6 @@ const Projects = () => {
     return (
         <section className="flex flex-col w-full py-3 px-4">
             <Toast ref={toast} />
-            <ConfirmDialog />
             {deletingIds.length > 0 && <Spinner visible onHide={() => setDeletingIds([])} />}
             {create && <NewProject close={() => setCreate(false)} onCreated={fetchData} />}
             {edit && (

@@ -214,7 +214,6 @@ export default function SupervisorSubmissions() {
     },
   ];
 
-
   const statusOptions = [
     { label: 'Pending', value: 'PENDING' },
     { label: 'Approved', value: 'APPROVED' },
@@ -231,7 +230,7 @@ export default function SupervisorSubmissions() {
   }
 
   return (
-    <div className="p-6 space-y-6">
+    <section className="p-6 space-y-6">
       <Toast ref={toast} />
 
       {/* Header */}
@@ -555,6 +554,6 @@ export default function SupervisorSubmissions() {
           ))}
         </div>
       </OverlayPanel>
-    </div>
+    </section>
   );
 }

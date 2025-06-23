@@ -163,7 +163,6 @@ const Users = () => {
     return (
         <section className="flex flex-col w-full py-3 px-4">
             <Toast ref={toast} />
-            <ConfirmDialog />
             {deletingIds.length > 0 && <Spinner visible onHide={() => setDeletingIds([])} />}
             {create && <NewUser close={() => setCreate(false)} onCreated={fetchData} />}
             {edit && (

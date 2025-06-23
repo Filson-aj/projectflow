@@ -6,7 +6,6 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { ConfirmDialog } from "primereact/confirmdialog";
 import { FilterMatchMode } from "primereact/api";
 import { Tag } from "primereact/tag";
 import { Toast } from "primereact/toast";
@@ -148,7 +147,6 @@ const Projects = () => {
     return (
         <section className="flex flex-col w-full py-3 px-4">
             <Toast ref={toast} />
-            <ConfirmDialog />
             {approving && <Spinner visible onHide={() => setApproving(false)} />}
 
             <div className="bg-white rounded-md shadow-md space-y-4">

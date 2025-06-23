@@ -6,7 +6,7 @@ import { Column } from "primereact/column";
 import { InputText } from "primereact/inputtext";
 import { Button } from "primereact/button";
 import { OverlayPanel } from "primereact/overlaypanel";
-import { ConfirmDialog, confirmDialog } from "primereact/confirmdialog";
+import { confirmDialog } from "primereact/confirmdialog";
 import { FilterMatchMode } from "primereact/api";
 import { Toast } from "primereact/toast";
 import Spinner from "@/components/Spinner/Spinner";
@@ -144,7 +144,6 @@ const Departments = () => {
     return (
         <section className="flex flex-col w-full py-3 px-4">
             <Toast ref={toast} />
-            <ConfirmDialog />
             {deletingIds.length > 0 && <Spinner visible onHide={() => setDeletingIds([])} />}
             {create && <NewDepartment close={() => setCreate(false)} onCreated={fetchData} />}
             {edit && (

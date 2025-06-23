@@ -9,7 +9,7 @@ import { Avatar } from 'primereact/avatar';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { Badge } from 'primereact/badge';
 import { Divider } from 'primereact/divider';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import {
@@ -130,7 +130,6 @@ export default function DashboardLayout({ children }) {
 
     return (
         <>
-            <ConfirmDialog />
             <main className="h-screen flex bg-gray-100 text-gray-900">
                 {/* Side bar */}
                 <AnimatePresence>

@@ -22,7 +22,6 @@ import {
 import StatisticsCard from '@/components/StatisticsCard';
 import DashboardChart from '@/components/DashboardChart';
 import Spinner from '@/components/Spinner/Spinner';
-import { set } from 'react-hook-form';
 
 export default function SupervisorDashboard() {
   const { data: session, status } = useSession();

@@ -15,7 +15,7 @@ import { Dropdown } from 'primereact/dropdown';
 import { FileUpload } from 'primereact/fileupload';
 import { Tag } from 'primereact/tag';
 import { Toast } from 'primereact/toast';
-import { ConfirmDialog, confirmDialog } from 'primereact/confirmdialog';
+import { confirmDialog } from 'primereact/confirmdialog';
 import { OverlayPanel } from 'primereact/overlaypanel';
 import { FilterMatchMode } from 'primereact/api';
 import { useForm, Controller } from 'react-hook-form';
@@ -278,7 +278,6 @@ export default function StudentSubmissions() {
   return (
     <div className="p-6 space-y-6">
       <Toast ref={toast} />
-      <ConfirmDialog />
 
       {/* Header */}
       <motion.div
