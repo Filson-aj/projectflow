@@ -9,6 +9,11 @@ import 'primereact/resources/themes/lara-light-cyan/theme.css';
 import 'primereact/resources/primereact.min.css';
 import 'primeicons/primeicons.css';
 
+export const meta = {
+  title: 'Project Management System',
+  description: 'A comprehensive project management system for academic projects, including student submissions, supervisor reviews, and administrative oversight.',
+};
+
 export default function RootLayout({ children }) {
   return (
     <html lang="en">

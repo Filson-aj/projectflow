@@ -143,10 +143,10 @@ export default function CoordinatorDashboard() {
   };
 
   const projectsChartData = [
-    { name: 'Jan', value: 12 }, { name: 'Feb', value: 19 }, { name: 'Mar', value: 15 },
-    { name: 'Apr', value: 25 }, { name: 'May', value: 22 }, { name: 'Jun', value: 30 },
-    { name: 'Jul', value: 40 }, { name: 'Aug', value: 35 }, { name: 'Sep', value: 20 },
-    { name: 'Oct', value: 30 }, { name: 'Nov', value: 28 }, { name: 'Dec', value: 17 }
+    { name: 'Jan', value: 0 }, { name: 'Feb', value: 0 }, { name: 'Mar', value: 0 },
+    { name: 'Apr', value: 0 }, { name: 'May', value: 0 }, { name: 'Jun', value: 0 },
+    { name: 'Jul', value: 0 }, { name: 'Aug', value: 0 }, { name: 'Sep', value: 0 },
+    { name: 'Oct', value: 0 }, { name: 'Nov', value: 0 }, { name: 'Dec', value: 0 }
   ];
 
   const projectDistribution = [

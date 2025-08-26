@@ -153,7 +153,7 @@ export default function SignIn() {
                     value={field.value}
                     onChange={field.onChange}
                     onBlur={field.onBlur}
-                    className={`w-full ${errors.password ? 'p-invalid' : ''}`}
+                    className={`w-full block ${errors.password ? 'p-invalid' : ''}`}
                   />
                 )}
               />

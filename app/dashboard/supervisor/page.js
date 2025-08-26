@@ -240,12 +240,12 @@ export default function SupervisorDashboard() {
 
   // Chart data
   const projectProgressData = [
-    { name: 'Week 1', value: 10 },
-    { name: 'Week 2', value: 25 },
-    { name: 'Week 3', value: 40 },
-    { name: 'Week 4', value: 60 },
-    { name: 'Week 5', value: 75 },
-    { name: 'Week 6', value: 85 }
+    { name: 'Week 1', value: 0 },
+    { name: 'Week 2', value: 0 },
+    { name: 'Week 3', value: 0 },
+    { name: 'Week 4', value: 0 },
+    { name: 'Week 5', value: 0 },
+    { name: 'Week 6', value: 0 }
   ];
 
   const submissionStatusData = [

@@ -102,9 +102,9 @@ export default function DashboardLayout({ children }) {
     const navigationItems = getNavigationItems();
 
     const notifications = [
-        { id: 1, title: 'New Project Submitted', message: 'John Doe submitted a new project topic', time: '2 minutes ago', type: 'info' },
+        /* { id: 1, title: 'New Project Submitted', message: 'John Doe submitted a new project topic', time: '2 minutes ago', type: 'info' },
         { id: 2, title: 'Project Approved', message: 'Your project "AI in Healthcare" has been approved', time: '1 hour ago', type: 'success' },
-        { id: 3, title: 'Deadline Reminder', message: 'Project submission deadline is tomorrow', time: '3 hours ago', type: 'warning' }
+        { id: 3, title: 'Deadline Reminder', message: 'Project submission deadline is tomorrow', time: '3 hours ago', type: 'warning' } */
     ];
 
     const getNotificationIcon = (type) => {
